@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Resep;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-
 
 class ResepController extends Controller
 {
@@ -16,21 +14,12 @@ class ResepController extends Controller
      */
     public function index()
     {
-        try {
-            $resep = Resep::all();
+        $resep = Resep::all();
 
-            return response([
-                "status" => true,
-                'message' => 'All Reseps Retrieved',
-                'data' => $resep
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => $e->getMessage(),
-                "data" => []
-            ], 400);
-        }
+        return response([
+            'message' => 'All Reseps Retrieved',
+            'data' => $resep
+        ], 200);
     }
 
     /**
@@ -38,20 +27,23 @@ class ResepController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $resep = Resep::create($request->all());
-            return response()->json([
-                "status" => true,
-                "message" => 'Berhasil Membuat data',
-                "data" => $resep
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => $e->getMessage(),
-                "data" => []
-            ], 400);
+        $data = $request->all();
+
+        $validate = Validator::make($data, [
+            'NAMA_RESEP' => 'required',
+            'KUANTITAS' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()->first()], 400);
         }
+
+        $resep = Resep::create($data);
+
+        return response([
+            'message' => 'Resep created successfully',
+            'data' => $resep
+        ], 200);
     }
 
     /**
@@ -59,23 +51,16 @@ class ResepController extends Controller
      */
     public function show($id)
     {
-        try {
-            $resep = Resep::find($id);
+        $resep = Resep::find($id);
 
-            if (!$resep) throw new \Exception("Resep tidak ditemukan");
-
-            return response()->json([
-                "status" => true,
-                "message" => 'Berhasil menampilkan data',
-                "data" => $resep
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => $e->getMessage(),
-                "data" => []
-            ], 400);
+        if (!$resep) {
+            return response(['message' => 'Resep not found'], 404);
         }
+
+        return response([
+            'message' => 'Show Resep Successfully',
+            'data' => $resep
+        ], 200);
     }
 
     /**
@@ -83,58 +68,44 @@ class ResepController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Tambahkan log ini untuk melihat ID yang sedang dicari
-        Log::info("Mencari Resep dengan ID: " . $id);
+        $resep = Resep::find($id);
 
-        try {
-            $resep = Resep::find($id);
-
-            if (!$resep) throw new \Exception("Resep tidak ditemukan");
-
-            // Tambahkan log untuk melihat data yang diterima
-            Log::info('Data yang diterima:', $request->all());
-
-            $resep->update($request->all());
-
-            return response()->json([
-                "status" => true,
-                "message" => 'Berhasil Update Resep',
-                "data" => $resep
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => $e->getMessage(),
-                "data" => []
-            ], 400);
+        if (!$resep) {
+            return response(['message' => 'Resep not found'], 404);
         }
+
+        $data = $request->all();
+
+        $validate = Validator::make($data, [
+            'NAMA_RESEP' => 'required',
+            'KUANTITAS' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()->first()], 400);
+        }
+
+        $resep->update($data);
+
+        return response([
+            'message' => 'Resep updated successfully',
+            'data' => $resep
+        ], 200);
     }
-
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
     {
-        try {
-            $resep = Resep::find($id);
+        $resep = Resep::find($id);
 
-            if (!$resep) throw new \Exception("Resep Tidak Ditemukan!");
-
-            $resep->delete();
-
-            return response()->json([
-                "status" => true,
-                "message" => 'Resep deleted successfully',
-                "data" => $resep
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => $e->getMessage(),
-                "data" => []
-            ], 400);
+        if (!$resep) {
+            return response(['message' => 'Resep not found'], 404);
         }
+
+        $resep->delete();
+
+        return response(['message' => 'Resep deleted successfully'], 200);
     }
 }

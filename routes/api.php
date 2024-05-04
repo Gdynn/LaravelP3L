@@ -84,4 +84,25 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/resep', [App\Http\Controllers\Api\ResepController::class, 'store']);
     Route::put('/resep/{id}', [App\Http\Controllers\Api\ResepController::class, 'update']);
     Route::delete('/resep/{id}', [App\Http\Controllers\Api\ResepController::class, 'destroy']);
+
+    //Presensi
+    Route::get('/presensi', [App\Http\Controllers\Api\PresensiController::class, 'index']);
+    Route::get('/presensi/{id}', [App\Http\Controllers\Api\PresensiController::class, 'show']);
+    Route::post('/presensi', [App\Http\Controllers\Api\PresensiController::class, 'store']);
+    Route::put('/presensi/{id}', [App\Http\Controllers\Api\PresensiController::class, 'update']);
+    Route::delete('/presensi/{id}', [App\Http\Controllers\Api\PresensiController::class, 'destroy']);
+
+    //Pegawai
+    Route::get('/pegawai', [App\Http\Controllers\Api\PegawaiController::class, 'index']);
+    Route::get('/pegawai/{id}', [App\Http\Controllers\Api\PegawaiController::class, 'show']);
+    Route::post('/pegawai', [App\Http\Controllers\Api\PegawaiController::class, 'store']);
+    Route::put('/pegawai/{id}', [App\Http\Controllers\Api\PegawaiController::class, 'update']);
+    Route::delete('/pegawai/{id}', [App\Http\Controllers\Api\PegawaiController::class, 'destroy']);
+
+    //Jabatan
+    Route::get('/jabatan', [App\Http\Controllers\Api\JabatanController::class, 'index']);
+    Route::get('/jabatan/{id}', [App\Http\Controllers\Api\JabatanController::class, 'show']);
+    Route::post('/jabatan', [App\Http\Controllers\Api\JabatanController::class, 'store']);
+    Route::put('/jabatan/{id}', [App\Http\Controllers\Api\JabatanController::class, 'update']);
+    Route::delete('/jabatan/{id}', [App\Http\Controllers\Api\JabatanController::class, 'destroy']);
 });

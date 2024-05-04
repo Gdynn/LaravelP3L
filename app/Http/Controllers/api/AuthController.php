@@ -37,7 +37,7 @@ class AuthController extends Controller
         $saldo = new Saldo();
         $saldo->JUMLAH = 0;
         $saldo->POIN = 0;
-        $saldo->save(); 
+        $saldo->save();
 
         $registrationData['id_saldo'] = $saldo->ID_SALDO;
 
