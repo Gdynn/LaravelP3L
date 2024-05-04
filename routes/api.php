@@ -77,5 +77,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/pembelianbahanbaku', [App\Http\Controllers\Api\PembelianBahanBakuController::class, 'store']);
     Route::put('/pembelianbahanbaku/{id}', [App\Http\Controllers\Api\PembelianBahanBakuController::class, 'update']);
     Route::delete('/pembelianbahanbaku/{id}', [App\Http\Controllers\Api\PembelianBahanBakuController::class, 'destroy']);
-});
 
+    //Resep
+    Route::get('/resep', [App\Http\Controllers\Api\ResepController::class, 'index']);
+    Route::get('/resep/{id}', [App\Http\Controllers\Api\ResepController::class, 'show']);
+    Route::post('/resep', [App\Http\Controllers\Api\ResepController::class, 'store']);
+    Route::put('/resep/{id}', [App\Http\Controllers\Api\ResepController::class, 'update']);
+    Route::delete('/resep/{id}', [App\Http\Controllers\Api\ResepController::class, 'destroy']);
+});
