@@ -15,4 +15,14 @@ class DetailHampers extends Model
         'ID_HAMPERS',
         'ID_PRODUK',
     ];
+
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class, 'ID_PRODUK');
+    }
+
+    public function hampers()
+    {
+        return $this->belongsTo(Hampers::class, 'ID_HAMPERS');
+    }
 }

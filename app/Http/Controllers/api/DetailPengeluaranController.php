@@ -14,7 +14,8 @@ class DetailPengeluaranController extends Controller
      */
     public function index()
     {
-        $detailPengeluaran = DetailPengeluaran::all();
+        // $detailPengeluaran = DetailPengeluaran::all();
+        $detailPengeluaran = DetailPengeluaran::with(['pembelianBahanBaku', 'bahanBaku'])->get();
 
         return response([
             'message' => 'All Pembelian Bahan Baku Retrieved',
@@ -51,7 +52,8 @@ class DetailPengeluaranController extends Controller
      */
     public function show($id)
     {
-        $detailPengeluaran = DetailPengeluaran::find($id);
+        // $detailPengeluaran = DetailPengeluaran::find($id);
+        $detailPengeluaran = DetailPengeluaran::with(['pembelianBahanBaku', 'bahanBaku'])->find($id);
 
         if (!$detailPengeluaran) {
             return response(['message' => 'Detail Pengeluaran not found'], 404);
@@ -68,7 +70,8 @@ class DetailPengeluaranController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $detailPengeluaran = DetailPengeluaran::find($id);
+        // $detailPengeluaran = DetailPengeluaran::find($id);
+        $detailPengeluaran = DetailPengeluaran::with(['pembelianBahanBaku', 'bahanBaku'])->find($id);
 
         if (!$detailPengeluaran) {
             return response(['message' => 'Detail Pengeluaran not found'], 404);
@@ -85,10 +88,12 @@ class DetailPengeluaranController extends Controller
             return response(['message' => $validate->errors()->first()], 400);
         }
 
-        $detailPengeluaran->ID_PEMBELIAN = $data['ID_PEMBELIAN'];
-        $detailPengeluaran->ID_BAHAN_BAKU = $data['ID_BAHAN_BAKU'];
+        // $detailPengeluaran->ID_PEMBELIAN = $data['ID_PEMBELIAN'];
+        // $detailPengeluaran->ID_BAHAN_BAKU = $data['ID_BAHAN_BAKU'];
 
-        $detailPengeluaran->save();
+        // $detailPengeluaran->save();
+
+        $detailPengeluaran->update($data);
 
         return response([
             'message' => 'Detail Pengeluaran updated successfully',
@@ -101,7 +106,8 @@ class DetailPengeluaranController extends Controller
      */
     public function destroy($id)
     {
-        $detailPengeluaran = DetailPengeluaran::find($id);
+        // $detailPengeluaran = DetailPengeluaran::find($id);
+        $detailPengeluaran = DetailPengeluaran::with(['pembelianBahanBaku', 'bahanBaku'])->find($id);
 
         if (!$detailPengeluaran) {
             return response(['message' => 'Detail Pengeluaran not found'], 404);

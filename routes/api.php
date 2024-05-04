@@ -25,10 +25,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/users', [App\Http\Controllers\Api\UserController::class, 'showAll']);
     Route::post('/users/update', [App\Http\Controllers\Api\UserController::class, 'updateProfile']);
     Route::post('/usersUpdate/{id}', [App\Http\Controllers\Api\UserController::class, 'updateUser']);
-
     Route::get('/userLogin', [App\Http\Controllers\Api\UserController::class, 'showByLogin']);
-
     Route::delete('/users/{id}', [App\Http\Controllers\Api\UserController::class, 'destroy']);
+    
     //item
     Route::get('/item', [App\Http\Controllers\Api\ItemController::class, 'showAll']);
     Route::get('/item/{id}', [App\Http\Controllers\Api\ItemController::class, 'showById']);
@@ -56,6 +55,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/bahanbaku', [App\Http\Controllers\Api\BahanBakuController::class, 'store']);
     Route::put('/bahanbaku/{id}', [App\Http\Controllers\Api\BahanBakuController::class, 'update']);
     Route::delete('/bahanbaku/{id}', [App\Http\Controllers\Api\BahanBakuController::class, 'destroy']);
+    Route::put('stokbahanbaku/{id}', [App\Http\Controllers\Api\BahanBakuController::class, 'updateStok']);
 
     //detail hampers
     Route::get('/detailhampers', [App\Http\Controllers\Api\DetailHampersController::class, 'index']);

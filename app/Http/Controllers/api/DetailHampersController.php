@@ -14,7 +14,8 @@ class DetailHampersController extends Controller
      */
     public function index()
     {
-        $detailHampers = DetailHampers::all();
+        // $detailHampers = DetailHampers::all();
+        $detailHampers = DetailHampers::with(['produk', 'hampers'])->get();
 
         return response([
             'message' => 'All Detail Hampers Retrieved',
@@ -49,9 +50,10 @@ class DetailHampersController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        $detailHampers = DetailHampers::find($id);
+        // $detailHampers = DetailHampers::find($id);
+        $detailHampers = DetailHampers::with(['produk', 'hampers'])->find($id);
 
         if (!$detailHampers) {
             return response(['message' => 'Detail Hampers not found'], 404);
@@ -66,9 +68,10 @@ class DetailHampersController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        $detailHampers = DetailHampers::find($id);
+        // $detailHampers = DetailHampers::find($id);
+        $detailHampers = DetailHampers::with(['produk', 'hampers'])->find($id);
 
         if (!$detailHampers) {
             return response(['message' => 'Detail Hampers not found'], 404);
@@ -85,10 +88,12 @@ class DetailHampersController extends Controller
             return response(['message' => $validate->errors()->first()], 400);
         }
 
-        $detailHampers->ID_HAMPERS = $data['ID_HAMPERS'];
-        $detailHampers->ID_PRODUK = $data['ID_PRODUK'];
+        // $detailHampers->ID_HAMPERS = $data['ID_HAMPERS'];
+        // $detailHampers->ID_PRODUK = $data['ID_PRODUK'];
 
-        $detailHampers->save();
+        $detailHampers->update($data);
+
+        // $detailHampers->save();
 
         return response([
             'message' => 'Detail Hampers updated successfully',
@@ -99,9 +104,10 @@ class DetailHampersController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        $detailHampers = DetailHampers::find($id);
+        // $detailHampers = DetailHampers::find($id);
+        $detailHampers = DetailHampers::with(['produk', 'hampers'])->find($id);
 
         if (!$detailHampers) {
             return response(['message' => 'Detail Hampers not found'], 404);

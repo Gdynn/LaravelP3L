@@ -31,7 +31,6 @@ class ProdukController extends Controller
 
         $validate = Validator::make($data, [
             'NAMA_PRODUK' => 'required',
-            'ID_RESEP' => 'required',
             'HARGA' => 'required',
             'JENIS_PRODUK' => 'required',
         ]);
@@ -75,6 +74,19 @@ class ProdukController extends Controller
         if (!$product) {
             return response(['message' => 'Product not found'], 404);
         }
+
+        // Manually set each attribute
+        // $product->NAMA_PRODUK = $request->input('NAMA_PRODUK', $product->NAMA_PRODUK);
+        // $product->HARGA = $request->input('HARGA', $product->HARGA);
+        // $product->JENIS_PRODUK = $request->input('JENIS_PRODUK', $product->JENIS_PRODUK);
+        // $product->KUANTITAS = $request->input('KUANTITAS', $product->KUANTITAS);
+
+        // $product->save(); // Explicitly save the model
+
+        // return response([
+        //     'message' => 'Product updated successfully',
+        //     'data' => $product
+        // ], 200);
 
         $data = $request->all();
 

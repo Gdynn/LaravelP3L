@@ -92,6 +92,31 @@ class BahanBakuController extends Controller
         ], 200);
     }
 
+    public function updateStok(Request $request, $id){
+        $bahanBaku = BahanBaku::find($id);
+
+        if (!$bahanBaku) {
+            return response(['message' => 'Bahan Baku not found'], 404);
+        }
+
+        $data = $request->all();
+
+        $validate = Validator::make($data, [
+            'STOK' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()->first()], 400);
+        }
+
+        $bahanBaku->update($data);
+
+        return response([
+            'message' => 'Bahan Baku updated successfully',
+            'data' => $bahanBaku
+        ], 200);
+    }
+
     /**
      * Remove the specified resource from storage.
      */

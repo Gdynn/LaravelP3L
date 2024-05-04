@@ -24,7 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'notelp',
-        'role',
+        'type_pengguna',
         'verify_key',
         'active',
     ];

@@ -32,7 +32,7 @@ class AuthController extends Controller
         }
 
         $registrationData['password'] = bcrypt($request->password);
-        $registrationData['role'] = 'customer';
+        $registrationData['type_pengguna'] = 'customer';
 
         $saldo = new Saldo();
         $saldo->JUMLAH = 0;

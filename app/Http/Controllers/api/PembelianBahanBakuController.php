@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PembelianBahanBaku;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class PembelianBahanBakuController extends Controller
 {
@@ -32,14 +33,15 @@ class PembelianBahanBakuController extends Controller
         $validate = Validator::make($data, [
             'KUANTITAS' => 'required',
             'HARGA' => 'required',
-            'TANGGAL' => 'required',
         ]);
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()->first()], 400);
         }
 
-        $pembelianBahanBaku = PembelianBahanBakuController::create($data);
+        $data['TANGGAL'] = Carbon::now();
+
+        $pembelianBahanBaku = PembelianBahanBaku::create($data);
 
         return response([
             'message' => 'Pembelian Bahan Baku created successfully',
@@ -80,12 +82,13 @@ class PembelianBahanBakuController extends Controller
         $validate = Validator::make($data, [
             'KUANTITAS' => 'required',
             'HARGA' => 'required',
-            'TANGGAL' => 'required',
         ]);
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()->first()], 400);
         }
+
+        $data['TANGGAL'] = Carbon::now();
 
         $pembelianBahanBaku->update($data);
 

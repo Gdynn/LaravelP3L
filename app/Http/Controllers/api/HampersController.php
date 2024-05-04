@@ -30,7 +30,6 @@ class HampersController extends Controller
         $data = $request->all();
 
         $validate = Validator::make($data, [
-            'ID_PRODUK' => 'required',
             'NAMA_HAMPERS' => 'required',
             'KETERANGAN' => 'required',
             'HARGA' => 'required',
@@ -79,7 +78,6 @@ class HampersController extends Controller
         $data = $request->all();
 
         $validate = Validator::make($data, [
-            'ID_PRODUK' => 'required',
             'NAMA_HAMPERS' => 'required',
             'KETERANGAN' => 'required',
             'HARGA' => 'required',
