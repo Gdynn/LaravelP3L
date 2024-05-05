@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Resep extends Model
 {
+    protected $table = 'resep';
     protected $primaryKey = 'ID_RESEP';
     public $timestamps = false;
 

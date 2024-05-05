@@ -9,6 +9,8 @@ use SebastianBergmann\CodeUnit\FunctionUnit;
 
 class Pegawai extends Model
 {
+    protected $table = 'pegawai';
+
     use HasFactory;
     protected $primaryKey = 'ID_PEGAWAI';
     public $timestamps = false;

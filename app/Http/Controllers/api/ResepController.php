@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Resep;
@@ -58,7 +58,7 @@ class ResepController extends Controller
         }
 
         return response([
-            'message' => 'Show Resep Successfully',
+            'message' => 'Resep Retrieved',
             'data' => $resep
         ], 200);
     }
