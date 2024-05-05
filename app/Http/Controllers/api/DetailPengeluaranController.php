@@ -80,7 +80,6 @@ class DetailPengeluaranController extends Controller
         $data = $request->all();
 
         $validate = Validator::make($data, [
-            'ID_PEMBELIAN' => 'required',
             'ID_BAHAN_BAKU' => 'required',
         ]);
 
