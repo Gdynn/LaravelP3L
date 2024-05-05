@@ -32,7 +32,6 @@ class User extends Authenticatable
 
     public function transactions()
     {
-        
     }
 
     protected $hidden = [
@@ -47,6 +46,5 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
     ];
 }

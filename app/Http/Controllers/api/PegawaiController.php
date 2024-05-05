@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pegawai;
+use Illuminate\Support\Facades\Validator;
 
 class PegawaiController extends Controller
 {
@@ -35,20 +36,25 @@ class PegawaiController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $pegawai = Pegawai::create($request->all());
-            return response()->json([
-                "status" => true,
-                "message" => 'Berhasil Membuat data',
-                "data" => $pegawai
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => $e->getMessage(),
-                "data" => []
-            ], 400);
+        $data = $request->all();
+
+        $validate = Validator::make($data, [
+            'NAMA_PEGAWAI' => 'required',
+            'NOTELP_PEGAWAI' => 'required',
+            'ALAMAT' => 'required',
+            'EMAIL' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()->first()], 400);
         }
+
+        $pegawai = Pegawai::create($data);
+
+        return response([
+            'message' => 'Pegawai created successfully',
+            'data' => $pegawai
+        ], 200);
     }
 
     /**

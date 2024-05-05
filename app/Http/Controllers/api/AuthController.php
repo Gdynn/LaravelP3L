@@ -31,7 +31,7 @@ class AuthController extends Controller
             return response(['message' => $validate->errors()->first()], 400);
         }
 
-        $registrationData['password'] = bcrypt($request->password);
+        $registrationData['password'] = ($request->password);
         $registrationData['type_pengguna'] = 'customer';
 
         $saldo = new Saldo();
