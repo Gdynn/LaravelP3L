@@ -105,4 +105,39 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/jabatan', [App\Http\Controllers\Api\JabatanController::class, 'store']);
     Route::put('/jabatan/{id}', [App\Http\Controllers\Api\JabatanController::class, 'update']);
     Route::delete('/jabatan/{id}', [App\Http\Controllers\Api\JabatanController::class, 'destroy']);
+
+    //Alamat
+    Route::get('/alamat', [App\Http\Controllers\Api\AlamatController::class, 'index']);
+    Route::get('/alamat/{id}', [App\Http\Controllers\Api\AlamatController::class, 'show']);
+    Route::post('/alamat', [App\Http\Controllers\Api\AlamatController::class, 'store']);
+    Route::put('/alamat/{id}', [App\Http\Controllers\Api\AlamatController::class, 'update']);
+    Route::delete('/alamat/{id}', [App\Http\Controllers\Api\AlamatController::class, 'destroy']);
+
+    //PromoPoin
+    Route::get('/promopoin', [App\Http\Controllers\Api\PromoPoinController::class, 'index']);
+    Route::get('/promopoin/{id}', [App\Http\Controllers\Api\PromoPoinController::class, 'show']);
+    Route::post('/promopoin', [App\Http\Controllers\Api\PromoPoinController::class, 'store']);
+    Route::put('/promopoin/{id}', [App\Http\Controllers\Api\PromoPoinController::class, 'update']);
+    Route::delete('/promopoin/{id}', [App\Http\Controllers\Api\PromoPoinController::class, 'destroy']);
+
+    //Pemesanan
+    Route::get('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'index']);
+    Route::get('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'show']);
+    Route::post('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'store']);
+    Route::put('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'update']);
+    Route::delete('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'destroy']);
+
+    //DetailPemesananHampers
+    Route::get('/detailpemesananhampers', [App\Http\Controllers\Api\DetailPemesananHampersController::class, 'index']);
+    Route::get('/detailpemesananhampers/{id}', [App\Http\Controllers\Api\DetailPemesananHampersController::class, 'show']);
+    Route::post('/detailpemesananhampers', [App\Http\Controllers\Api\DetailPemesananHampersController::class, 'store']);
+    Route::put('/detailpemesananhampers/{id}', [App\Http\Controllers\Api\DetailPemesananHampersController::class, 'update']);
+    Route::delete('/detailpemesananhampers/{id}', [App\Http\Controllers\Api\DetailPemesananHampersController::class, 'destroy']);
+
+    //DetailPemesananProduk
+    Route::get('/detailpemesananproduk', [App\Http\Controllers\Api\DetailPemesananProdukController::class, 'index']);
+    Route::get('/detailpemesananproduk/{id}', [App\Http\Controllers\Api\DetailPemesananProdukController::class, 'show']);
+    Route::post('/detailpemesananproduk', [App\Http\Controllers\Api\DetailPemesananProdukController::class, 'store']);
+    Route::put('/detailpemesananproduk/{id}', [App\Http\Controllers\Api\DetailPemesananProdukController::class, 'update']);
+    Route::delete('/detailpemesananproduk/{id}', [App\Http\Controllers\Api\DetailPemesananProdukController::class, 'destroy']);
 });
