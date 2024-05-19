@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Alamat extends Model
 {
+    use HasFactory;
+
     protected $table = 'alamat';
     protected $primaryKey = 'ID_ALAMAT';
     public $timestamps = false;
@@ -19,6 +21,6 @@ class Alamat extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'ID_USER');
+        return $this->belongsTo(User::class, 'ID_USER', 'id_user');
     }
 }

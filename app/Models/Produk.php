@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Produk extends Model
 {
+    use HasFactory;
     protected $table = 'produk';
     protected $primaryKey = 'ID_PRODUK';
+    public $incrementing = true;
+    protected $keyType = 'int';
     public $timestamps = false;
 
     protected $fillable = [
@@ -18,4 +21,9 @@ class Produk extends Model
         'HARGA',
         'JENIS_PRODUK',
     ];
+
+    public function limitHarian()
+    {
+        return $this->hasMany(LimitHarian::class, 'ID_PRODUK', 'ID_PRODUK');
+    }
 }

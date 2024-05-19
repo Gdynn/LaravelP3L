@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class DetailPemesananProduk extends Model
 {
+    use HasFactory;
     protected $table = 'detail_pemesanan_produk';
     protected $primaryKey = 'ID_DETAIL_PRODUK';
+    public $incrementing = true;
+    protected $keyType = 'int';
     public $timestamps = false;
 
     protected $fillable = [
@@ -20,11 +23,11 @@ class DetailPemesananProduk extends Model
 
     public function pemesanan()
     {
-        return $this->belongsTo(Pemesanan::class, 'ID_PEMESANAN');
+        return $this->belongsTo(Pemesanan::class, 'ID_PEMESANAN', 'ID_PEMESANAN');
     }
 
     public function produk()
     {
-        return $this->belongsTo(Produk::class, 'ID_PRODUK');
+        return $this->belongsTo(Produk::class, 'ID_PRODUK', 'ID_PRODUK');
     }
 }

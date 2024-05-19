@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\api;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Pemesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
+use Exception;
 
 class UserController extends Controller
 {
@@ -20,138 +22,167 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function showById($id)
+    public function showByIdUserAlamat($id)
     {
-        $user = User::find($id);
+        // Use User::with('alamat')->find($id) to find the user with the specific id and eager load the related alamat
+        $user = User::with('alamat')->find($id);
+
+        if (!$user) {
+            return response(['message' => 'User not found'], 404);
+        }
+
+        $result = [
+            'ID_USER' => $user->id_user, // Change to 'id_user' based on your model
+            'NAMA_USER' => $user->username, // Change to 'username' based on your model
+            'EMAIL' => $user->email,
+            'NO_TELP' => $user->notelp,
+            'POIN' => $user->poin,
+            'TANGGAL_LAHIR' => $user->tanggal_lahir,
+            'ALAMAT' => $user->alamat->map(function ($alamat) {
+                return [
+                    'ID_ALAMAT' => $alamat->ID_ALAMAT,
+                    'NAMA_ALAMAT' => $alamat->NAMA_ALAMAT,
+                    'ALAMAT' => $alamat->ALAMAT,
+                ];
+            })
+        ];
 
         return response([
             'message' => 'Show User Successfully',
-            'data' => $user
+            'data' => $result
         ], 200);
     }
 
     public function showByLogin()
     {
+        $user = User::with('alamat')->find(auth()->id());
 
-        $user = User::find(auth()->id());
+        if (!$user) {
+            return response(['message' => 'User not found'], 404);
+        }
+
+        $result = [
+            'ID_USER' => $user->id_user, // Change to 'id_user' based on your model
+            'NAMA_USER' => $user->username, // Change to 'username' based on your model
+            'EMAIL' => $user->email,
+            'NO_TELP' => $user->notelp,
+            'POIN' => $user->poin,
+            'ALAMAT' => $user->alamat->map(function ($alamat) {
+                return [
+                    'ID_ALAMAT' => $alamat->ID_ALAMAT,
+                    'NAMA_ALAMAT' => $alamat->NAMA_ALAMAT,
+                    'ALAMAT' => $alamat->ALAMAT,
+                ];
+            })
+        ];
 
         return response([
             'message' => 'Show User Successfully',
-            'data' => $user
+            'data' => $result
         ], 200);
     }
 
-    public function updateProfile(Request $request)
+    public function getUnpaidOrders()
     {
+        $userId = auth()->id();
 
-        $data = $request->all();
-        
+        $unpaidOrders = Pemesanan::where('ID_USER', $userId)
+            ->where('STATUS', 'Belum Dibayar')
+            ->with([
+                'detailPemesananProduk.produk',
+                'detailPemesananHampers.hampers'
+            ])
+            ->get();
 
-        $user = User::find(auth()->id());
-
-        if ($user == null) {
+        if ($unpaidOrders->isEmpty()) {
             return response([
-                'message' => 'User Not Found',
-            ], 400);
-        }
-        $temp = $user['email'];
-        $user['email'] = '';
-        $user->save();
-
-        $validate = Validator::make($data, [
-            'email' => 'nullable|email:rfc,dns|unique:users,email',
-        ]);
-
-
-        if ($validate->fails()) {
-            $user['email'] = $temp;
-            $user->save();
-            return response(['message' => $validate->errors()->first()], 400);
+                'message' => 'No unpaid orders found',
+                'data' => []
+            ], 404);
         }
 
-        $data2 = json_encode($request->all());
-
-        $user->update($data);
+        $result = $unpaidOrders->map(function ($order) {
+            return [
+                'ID_PEMESANAN' => $order->ID_PEMESANAN,
+                'ID_USER' => $order->ID_USER,
+                'TANGGAL_PESAN' => $order->TANGGAL_PESAN,
+                'TANGGAL_LUNAS' => $order->TANGGAL_LUNAS,
+                'TANGGAL_AMBIL' => $order->TANGGAL_AMBIL,
+                'STATUS' => $order->STATUS,
+                'TOTAL' => $order->TOTAL,
+                'BUKTI_BAYAR' => $order->BUKTI_BAYAR,
+                'JUMLAH_BAYAR' => $order->JUMLAH_BAYAR,
+                'JARAK' => $order->JARAK,
+                'DELIVERY' => $order->DELIVERY,
+                'ALAMAT' => $order->ALAMAT,
+                'DETAIL_PEMESANAN_PRODUK' => $order->detailPemesananProduk->map(function ($detail) {
+                    return [
+                        'ID_DETAIL_PEMESANAN_PRODUK' => $detail->ID_DETAIL_PRODUK,
+                        'ID_PEMESANAN' => $detail->ID_PEMESANAN,
+                        'ID_PRODUK' => $detail->ID_PRODUK,
+                        'KUANTITAS' => $detail->KUANTITAS,
+                        'HARGA' => $detail->HARGA,
+                        'PRODUK' => [
+                            'ID_PRODUK' => $detail->produk->ID_PRODUK,
+                            'NAMA_PRODUK' => $detail->produk->NAMA_PRODUK,
+                            'HARGA' => $detail->produk->HARGA,
+                            'JENIS_PRODUK' => $detail->produk->JENIS_PRODUK,
+                            'KUANTITAS' => $detail->produk->KUANTITAS,
+                        ]
+                    ];
+                }),
+                'DETAIL_PEMESANAN_HAMPERS' => $order->detailPemesananHampers->map(function ($detail) {
+                    return [
+                        'ID_DETAIL_PEMESANAN_HAMPERS' => $detail->ID_DETAIL_HAMPERS,
+                        'ID_PEMESANAN' => $detail->ID_PEMESANAN,
+                        'ID_HAMPERS' => $detail->ID_HAMPERS,
+                        'KUANTITAS' => $detail->KUANTITAS,
+                        'HARGA' => $detail->HARGA,
+                        'HAMPERS' => [
+                            'ID_HAMPERS' => $detail->hampers->ID_HAMPERS,
+                            'NAMA_HAMPERS' => $detail->hampers->NAMA_HAMPERS,
+                            'HARGA' => $detail->hampers->HARGA,
+                            'KETERANGAN' => $detail->hampers->KETERANGAN,
+                        ]
+                    ];
+                })
+            ];
+        });
 
         return response([
-            'message' => 'Update Profile Success',
-            'data' => $user,
-            'data2' => $data2
+            'message' => 'Unpaid orders retrieved successfully',
+            'data' => $result
         ], 200);
     }
 
-    public function updateUser(Request $request,$id)
+    public function updatePoin(Request $request, $id)
     {
+        try {
+            // Validate request
+            $validated = $request->validate([
+                'poin' => 'required|numeric'
+            ]);
 
-        $data = $request->all();
-        
+            // Find the user by ID
+            $user = User::findOrFail($id);
 
-        $user = User::find($id);
+            // Update poin
+            $user->update([
+                'poin' => $validated['poin']
+            ]);
 
-        if ($user == null) {
-            return response([
-                'message' => 'User Not Found',
-            ], 400);
+            return response()->json(['message' => 'Poin updated successfully'], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (Exception $e) {
+            \Log::error('Failed to update poin: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to update poin',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        $temp = $user['email'];
-        $user['email'] = '';
-        $user->save();
-
-        $validate = Validator::make($data, [
-            'email' => 'nullable|email:rfc,dns|unique:users,email',
-        ]);
-
-
-        if ($validate->fails()) {
-            $user['email'] = $temp;
-            $user->save();
-            return response(['message' => $validate->errors()->first()], 400);
-        }
-
-        $data2 = json_encode($request->all());
-
-        $user->update($data);
-
-        return response([
-            'message' => 'Update Profile Success',
-            'data' => $user,
-            'data2' => $data2
-        ], 200);
-    }
-
-    public function destroy($id)
-    {
-        $user = User::find($id);
-
-        if ($user == null) {
-            return response([
-                'message' => 'User Not Found',
-            ], 400);
-        }
-
-        $user->delete();
-
-        return response([
-            'message' => 'Delete User Successfully',
-        ], 200);
-    }
-
-    public function tempCreate(Request $request, $id)
-    {
-        $user = User::find($id);
-
-
-        $uploadFolder = 'users';
-        $image = $request->file('image_profile');
-        $image_uploaded_path = $image->store($uploadFolder, 'public');
-        $uploadedImageResponse = basename($image_uploaded_path);
-
-        $user['image_profile'] = $uploadedImageResponse;
-
-        $user->save();
-
-        return response([
-            'message' => $user
-        ]);
     }
 }

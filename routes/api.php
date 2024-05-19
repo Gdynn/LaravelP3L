@@ -18,7 +18,7 @@ Route::post('/register', [App\Http\Controllers\Api\AuthController::class, 'regis
 Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login']);
 Route::post('/test/{id}', [App\Http\Controllers\Api\UserController::class, 'tempCreate']);
 Route::get('/verify/{verify_key}', [App\Http\Controllers\Api\AuthController::class, 'verify']);
-Route::get('/users/{id}', [App\Http\Controllers\Api\UserController::class, 'showById']);
+Route::get('/usersalamat/{id}', [App\Http\Controllers\Api\UserController::class, 'showByIdUserAlamat']);
 
 Route::middleware('auth:api')->group(function () {
     //user
@@ -27,6 +27,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/usersUpdate/{id}', [App\Http\Controllers\Api\UserController::class, 'updateUser']);
     Route::get('/userLogin', [App\Http\Controllers\Api\UserController::class, 'showByLogin']);
     Route::delete('/users/{id}', [App\Http\Controllers\Api\UserController::class, 'destroy']);
+    Route::get('/user/unpaid-orders', [App\Http\Controllers\Api\UserController::class, 'getUnpaidOrders']);
+    Route::put('/user/{id}/update-poin', [App\Http\Controllers\Api\UserController::class, 'updatePoin']);
     
     //item
     Route::get('/item', [App\Http\Controllers\Api\ItemController::class, 'showAll']);
@@ -37,6 +39,12 @@ Route::middleware('auth:api')->group(function () {
 
     //produk
     Route::get('/produk', [App\Http\Controllers\Api\ProdukController::class, 'index']);
+    Route::get('/produkCake', [App\Http\Controllers\Api\ProdukController::class, 'fetchCake']);
+    Route::get('/produkRoti', [App\Http\Controllers\Api\ProdukController::class, 'fetchRoti']);
+    Route::get('/produkMinuman', [App\Http\Controllers\Api\ProdukController::class, 'fetchMinuman']);
+    Route::get('/produkTitipan', [App\Http\Controllers\Api\ProdukController::class, 'fetchTitipan']);
+    Route::get('/produkMobile', [App\Http\Controllers\Api\ProdukController::class, 'fetchMobile']);
+    Route::get('/produkLimit', [App\Http\Controllers\Api\ProdukController::class, 'fetchProdukLimit']);
     Route::get('/produk/{id}', [App\Http\Controllers\Api\ProdukController::class, 'show']);
     Route::post('/produk', [App\Http\Controllers\Api\ProdukController::class, 'store']);
     Route::put('/produk/{id}', [App\Http\Controllers\Api\ProdukController::class, 'update']);
@@ -122,10 +130,12 @@ Route::middleware('auth:api')->group(function () {
 
     //Pemesanan
     Route::get('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'index']);
-    Route::get('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'show']);
-    Route::post('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'store']);
+    Route::get('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'getPemesananById']);
+    Route::post('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'order']);
     Route::put('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'update']);
+    Route::put('/buktibayar/{id}', [App\Http\Controllers\Api\PemesananController::class, 'uploadBuktiBayar']);
     Route::delete('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'destroy']);
+    Route::get('/pemesananunpaid', [App\Http\Controllers\Api\PemesananController::class, 'getUnpaidOrders']);
 
     //DetailPemesananHampers
     Route::get('/detailpemesananhampers', [App\Http\Controllers\Api\DetailPemesananHampersController::class, 'index']);
@@ -140,4 +150,12 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/detailpemesananproduk', [App\Http\Controllers\Api\DetailPemesananProdukController::class, 'store']);
     Route::put('/detailpemesananproduk/{id}', [App\Http\Controllers\Api\DetailPemesananProdukController::class, 'update']);
     Route::delete('/detailpemesananproduk/{id}', [App\Http\Controllers\Api\DetailPemesananProdukController::class, 'destroy']);
+
+    //Limit Harian
+    Route::get('/limitharian', [App\Http\Controllers\Api\LimitHarianController::class, 'index']);
+    Route::get('/limitharian/{id}', [App\Http\Controllers\Api\LimitHarianController::class, 'show']);
+    Route::get('/limitharianHariIni', [App\Http\Controllers\Api\LimitHarianController::class, 'searchByHariIni']);
+    Route::post('/limitharian', [App\Http\Controllers\Api\LimitHarianController::class, 'store']);
+    Route::put('/limitharian/{id}', [App\Http\Controllers\Api\LimitHarianController::class, 'update']);
+    Route::delete('/limitharian/{id}', [App\Http\Controllers\Api\LimitHarianController::class, 'destroy']);
 });
