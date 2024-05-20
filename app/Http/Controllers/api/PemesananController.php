@@ -37,6 +37,7 @@ class PemesananController extends Controller
 
     public function order(Request $request)
     {
+        DB::beginTransaction();
         try {
             // Validasi request
             $validated = $request->validate([
@@ -67,7 +68,15 @@ class PemesananController extends Controller
             if (!empty($request->products)) {
                 foreach ($request->products as $product) {
                     // Check and create limit_harian if not exists
-                    $this->checkAndCreateLimitHarian($product['ID_PRODUK'], $tanggal_ambil);
+                    $limit = $this->checkAndCreateLimitHarian($product['ID_PRODUK'], $tanggal_ambil);
+
+                    // Check and update quota
+                    if ($limit->LIMIT_KUANTITAS - $product['KUANTITAS'] < 0) {
+                        throw new Exception("Quota for product {$product['ID_PRODUK']} on {$tanggal_ambil} is insufficient.");
+                    }
+
+                    $limit->LIMIT_KUANTITAS -= $product['KUANTITAS'];
+                    $limit->save();
 
                     DetailPemesananProduk::create([
                         'ID_PRODUK' => $product['ID_PRODUK'],
@@ -82,7 +91,15 @@ class PemesananController extends Controller
             if (!empty($request->hampers)) {
                 foreach ($request->hampers as $hamper) {
                     // Check and create limit_harian if not exists
-                    $this->checkAndCreateLimitHarian($hamper['ID_HAMPERS'], $tanggal_ambil, true);
+                    $limit = $this->checkAndCreateLimitHarian($hamper['ID_HAMPERS'], $tanggal_ambil, true);
+
+                    // Check and update quota
+                    if ($limit->LIMIT_KUANTITAS - $hamper['KUANTITAS'] < 0) {
+                        throw new Exception("Quota for hamper {$hamper['ID_HAMPERS']} on {$tanggal_ambil} is insufficient.");
+                    }
+
+                    $limit->LIMIT_KUANTITAS -= $hamper['KUANTITAS'];
+                    $limit->save();
 
                     DetailPemesananHampers::create([
                         'ID_HAMPERS' => $hamper['ID_HAMPERS'],
@@ -93,13 +110,17 @@ class PemesananController extends Controller
                 }
             }
 
+            DB::commit();
+
             return response()->json(['message' => 'Pemesanan berhasil disimpan'], 201);
         } catch (ValidationException $e) {
+            DB::rollBack();
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $e->errors()
             ], 422);
         } catch (Exception $e) {
+            DB::rollBack();
             \Log::error('Failed to process order: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to process order',
@@ -119,14 +140,18 @@ class PemesananController extends Controller
                 ->first();
 
             if (!$existingLimit) {
-                LimitHarian::create([
+                $existingLimit = LimitHarian::create([
                     'ID_PRODUK' => $id,
                     'TANGGAL' => $tanggal,
                     'LIMIT_KUANTITAS' => 15,
                     'STOK_HARI_INI' => 0,
                 ]);
             }
+
+            return $existingLimit;
         }
+
+        return null;
     }
 
     private function generateIdPemesanan()
@@ -189,8 +214,8 @@ class PemesananController extends Controller
             // Handle file upload
             if ($request->hasFile('BUKTI_BAYAR')) {
                 $file = $request->file('BUKTI_BAYAR');
-                $fileContent = file_get_contents($file->getRealPath());
-                $validated['BUKTI_BAYAR'] = $fileContent;
+                $path = $file->store('bukti_bayar', 'public');
+                $validated['BUKTI_BAYAR'] = $path;
             }
 
             // Update pemesanan
