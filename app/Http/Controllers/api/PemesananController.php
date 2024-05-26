@@ -78,6 +78,16 @@ class PemesananController extends Controller
                     $limit->LIMIT_KUANTITAS -= $product['KUANTITAS'];
                     $limit->save();
 
+                    // Kurangi kuantitas produk jika jenisnya adalah "titipan"
+                    $produk = Produk::find($product['ID_PRODUK']);
+                    if ($produk->JENIS_PRODUK === 'Titipan') {
+                        if ($produk->KUANTITAS - $product['KUANTITAS'] < 0) {
+                            throw new Exception("Insufficient quantity for product {$product['ID_PRODUK']}.");
+                        }
+                        $produk->KUANTITAS -= $product['KUANTITAS'];
+                        $produk->save();
+                    }
+
                     DetailPemesananProduk::create([
                         'ID_PRODUK' => $product['ID_PRODUK'],
                         'ID_PEMESANAN' => $id_pesan,
@@ -204,7 +214,7 @@ class PemesananController extends Controller
         try {
             // Validate request
             $validated = $request->validate([
-                'TOTAL' => 'required',
+                'TOTAL' => 'required|numeric',
                 'BUKTI_BAYAR' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 

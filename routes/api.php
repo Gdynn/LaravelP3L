@@ -20,6 +20,14 @@ Route::post('/test/{id}', [App\Http\Controllers\Api\UserController::class, 'temp
 Route::get('/verify/{verify_key}', [App\Http\Controllers\Api\AuthController::class, 'verify']);
 Route::get('/usersalamat/{id}', [App\Http\Controllers\Api\UserController::class, 'showByIdUserAlamat']);
 
+Route::get('/produk', [App\Http\Controllers\Api\ProdukController::class, 'index']);
+Route::get('/produkCake', [App\Http\Controllers\Api\ProdukController::class, 'fetchCake']);
+Route::get('/produkRoti', [App\Http\Controllers\Api\ProdukController::class, 'fetchRoti']);
+Route::get('/produkMinuman', [App\Http\Controllers\Api\ProdukController::class, 'fetchMinuman']);
+Route::get('/produkTitipan', [App\Http\Controllers\Api\ProdukController::class, 'fetchTitipan']);
+Route::get('/produkMobile', [App\Http\Controllers\Api\ProdukController::class, 'fetchMobile']);
+Route::get('/produkLimit', [App\Http\Controllers\Api\ProdukController::class, 'fetchProdukLimit']);
+
 Route::middleware('auth:api')->group(function () {
     //user
     Route::get('/users', [App\Http\Controllers\Api\UserController::class, 'showAll']);
@@ -29,7 +37,7 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/users/{id}', [App\Http\Controllers\Api\UserController::class, 'destroy']);
     Route::get('/user/unpaid-orders', [App\Http\Controllers\Api\UserController::class, 'getUnpaidOrders']);
     Route::put('/user/{id}/update-poin', [App\Http\Controllers\Api\UserController::class, 'updatePoin']);
-    
+
     //item
     Route::get('/item', [App\Http\Controllers\Api\ItemController::class, 'showAll']);
     Route::get('/item/{id}', [App\Http\Controllers\Api\ItemController::class, 'showById']);
@@ -38,13 +46,6 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/item/{id}', [App\Http\Controllers\Api\ItemController::class, 'destroy']);
 
     //produk
-    Route::get('/produk', [App\Http\Controllers\Api\ProdukController::class, 'index']);
-    Route::get('/produkCake', [App\Http\Controllers\Api\ProdukController::class, 'fetchCake']);
-    Route::get('/produkRoti', [App\Http\Controllers\Api\ProdukController::class, 'fetchRoti']);
-    Route::get('/produkMinuman', [App\Http\Controllers\Api\ProdukController::class, 'fetchMinuman']);
-    Route::get('/produkTitipan', [App\Http\Controllers\Api\ProdukController::class, 'fetchTitipan']);
-    Route::get('/produkMobile', [App\Http\Controllers\Api\ProdukController::class, 'fetchMobile']);
-    Route::get('/produkLimit', [App\Http\Controllers\Api\ProdukController::class, 'fetchProdukLimit']);
     Route::get('/produk/{id}', [App\Http\Controllers\Api\ProdukController::class, 'show']);
     Route::post('/produk', [App\Http\Controllers\Api\ProdukController::class, 'store']);
     Route::put('/produk/{id}', [App\Http\Controllers\Api\ProdukController::class, 'update']);
