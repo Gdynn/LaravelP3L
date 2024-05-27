@@ -131,6 +131,10 @@ Route::middleware('auth:api')->group(function () {
 
     //Pemesanan
     Route::get('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'index']);
+//     Route::get('/pemesananN/{id}', [App\Http\Controllers\Api\PemesananController::class, 'show']);
+//     Route::post('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'store']);
+//     Route::put('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'update']);
+//     Route::delete('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'destroy']);
     Route::get('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'getPemesananById']);
     Route::post('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'order']);
     Route::put('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'update']);
@@ -152,6 +156,27 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/detailpemesananproduk/{id}', [App\Http\Controllers\Api\DetailPemesananProdukController::class, 'update']);
     Route::delete('/detailpemesananproduk/{id}', [App\Http\Controllers\Api\DetailPemesananProdukController::class, 'destroy']);
 
+    //Pesanan untuk nampilkan semua pesanan yang udah ada jarak
+    Route::get('/pesanan', [App\Http\Controllers\Api\PesananController::class, 'index']);
+    Route::get('/pesanan/{id}', [App\Http\Controllers\Api\PesananController::class, 'show']);
+    Route::post('/pesanan', [App\Http\Controllers\Api\PesananController::class, 'store']);
+    Route::put('/pesanan/{id}', [App\Http\Controllers\Api\PesananController::class, 'update']);
+    Route::delete('/pesanan/{id}', [App\Http\Controllers\Api\PesananController::class, 'destroy']);
+
+    //Datar Pesanan (Pesanan yang belum di konfirmasi)
+    Route::get('/daftarpesanan', [App\Http\Controllers\Api\DaftarPesananController::class, 'index']);
+    Route::get('/daftarpesanan/{id}', [App\Http\Controllers\Api\DaftarPesananController::class, 'show']);
+    Route::post('/daftarpesanan', [App\Http\Controllers\Api\DaftarPesananController::class, 'store']);
+    Route::put('/daftarpesanan/{id}', [App\Http\Controllers\Api\DaftarPesananController::class, 'update']);
+    Route::delete('/daftarpesanan/{id}', [App\Http\Controllers\Api\DaftarPesananController::class, 'destroy']);
+
+    //Tip Pesanan
+    Route::get('/tippesanan', [App\Http\Controllers\Api\TipPesananController::class, 'index']);
+    Route::get('/tippesanan/{id}', [App\Http\Controllers\Api\TipPesananController::class, 'show']);
+    Route::post('/tippesanan', [App\Http\Controllers\Api\TipPesananController::class, 'store']);
+    Route::put('/tippesanan/{id}', [App\Http\Controllers\Api\TipPesananController::class, 'update']);
+    Route::delete('/tippesanan/{id}', [App\Http\Controllers\Api\TipPesananController::class, 'destroy']);
+  
     //Limit Harian
     Route::get('/limitharian', [App\Http\Controllers\Api\LimitHarianController::class, 'index']);
     Route::get('/limitharian/{id}', [App\Http\Controllers\Api\LimitHarianController::class, 'show']);

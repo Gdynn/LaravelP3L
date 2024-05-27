@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User; // Pastikan ini sesuai dengan lokasi model User Anda
 
 class Pemesanan extends Model
 {
@@ -27,6 +28,7 @@ class Pemesanan extends Model
         'JARAK',
         'DELIVERY',
         'ALAMAT',
+        'TIP',
     ];
 
     protected $casts = [
@@ -39,6 +41,15 @@ class Pemesanan extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'ID_USER', 'ID_USER');
+    }
+
+    protected $casts = [
+        'BUKTI_BAYAR' => 'array',
+        'ID_PEMESANAN' => 'string',
+    ];
+    public function getBuktiBayarAttribute($value)
+    {
+        return $value ? base64_encode($value) : null;
     }
 
     public function promo()
