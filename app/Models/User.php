@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class User extends Authenticatable
 {
-
     use HasApiTokens, HasFactory, Notifiable;
+    
     protected $table = 'users';
     protected $primaryKey = 'id_user';
     public $timestamps = false;
@@ -24,27 +24,27 @@ class User extends Authenticatable
         'email',
         'password',
         'notelp',
+        'saldo',
+        'poin',
+        'tanggal_lahir',
         'type_pengguna',
         'verify_key',
         'active',
     ];
 
-
-    public function transactions()
+    public function saldo()
     {
+        return $this->belongsTo(Saldo::class, 'id_saldo', 'id_saldo');
     }
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    public function pemesanan()
+    {
+        return $this->hasMany(Pemesanan::class, 'ID_USER', 'id_user');
+    }
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function alamat()
+    {
+        return $this->hasMany(Alamat::class, 'ID_USER', 'id_user'); // Changed from hasOne to hasMany
+    }
 }
+
