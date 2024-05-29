@@ -36,17 +36,14 @@ class Pemesanan extends Model
         'TANGGAL_PESAN' => 'datetime',
         'TANGGAL_LUNAS' => 'datetime',
         'TANGGAL_AMBIL' => 'datetime',
+        'BUKTI_BAYAR' => 'string'
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class, 'ID_USER', 'ID_USER');
     }
-
-    protected $casts = [
-        'BUKTI_BAYAR' => 'array',
-        'ID_PEMESANAN' => 'string',
-    ];
+    
     public function getBuktiBayarAttribute($value)
     {
         return $value ? base64_encode($value) : null;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UploadBuktiBayarRequest;
 use Illuminate\Http\Request;
 use App\Models\Pemesanan;
 use App\Models\DetailPemesananHampers;
@@ -44,7 +45,8 @@ class PemesananController extends Controller
         try {
             $pemesanan = Pemesanan::whereNull('JARAK')->get();
 
-            if (!$pemesanan) throw new \Exception("Pesanan tidak ditemukan");
+            if (!$pemesanan)
+                throw new \Exception("Pesanan tidak ditemukan");
 
             return response()->json([
                 "status" => true,
@@ -144,7 +146,7 @@ class PemesananController extends Controller
         return 0;
     }
 
-  public function indexPemesanan()
+    public function indexPemesanan()
     {
         try {
             $promoPoin = Pemesanan::all();
@@ -181,7 +183,6 @@ class PemesananController extends Controller
 
             // Generate ID_PEMESANAN
             $validated['ID_PEMESANAN'] = $this->generateIdPemesanan();
-            \Log::info('ID Pemesanan: ' . $validated['ID_PEMESANAN']);
 
             $id_pesan = $validated['ID_PEMESANAN'];
             $tanggal_ambil = $validated['TANGGAL_AMBIL'];
@@ -299,12 +300,9 @@ class PemesananController extends Controller
             ->whereMonth('TANGGAL_PESAN', $dateNow->month)
             ->latest('TANGGAL_PESAN')
             ->first();
-        \Log::info('Last Order: ' . $lastOrder);
 
         $lastId = $lastOrder ? (int) substr($lastOrder->ID_PEMESANAN, 6) : 0;
-        \Log::info('Last ID: ' . $lastId);
         $newId = str_pad($lastId + 1, 3, '0', STR_PAD_LEFT);
-        \Log::info('New ID: ' . $newId);
 
         return $year . '.' . $month . '.' . $newId;
     }
@@ -334,45 +332,31 @@ class PemesananController extends Controller
         }
     }
 
-    public function uploadBuktiBayar(Request $request, $id)
+    public function uploadBuktiBayar(UploadBuktiBayarRequest $request, $idPemesanan)
     {
-        try {
-            // Validate request
-            $validated = $request->validate([
-                'TOTAL' => 'required|numeric',
-                'BUKTI_BAYAR' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
+        \Log::info('Request received for uploadBuktiBayar');
+        \Log::info($request->all());
 
-            // Find the pemesanan by ID
-            $pemesanan = Pemesanan::findOrFail($id);
+        $pemesanan = Pemesanan::findOrFail($idPemesanan);
 
-            // Handle file upload
-            if ($request->hasFile('BUKTI_BAYAR')) {
-                $file = $request->file('BUKTI_BAYAR');
-                $path = $file->store('bukti_bayar', 'public');
-                $validated['BUKTI_BAYAR'] = $path;
-            }
+        if ($request->hasFile('BUKTI_BAYAR')) {
+            // Store the file
+            $file = $request->file('BUKTI_BAYAR');
+            $path = $file->store('bukti_bayar', 'public');
 
-            // Update pemesanan
-            $pemesanan->update([
-                'TOTAL' => $validated['TOTAL'],
-                'BUKTI_BAYAR' => $validated['BUKTI_BAYAR'],
-                'STATUS' => 'Menunggu Konfirmasi',
-            ]);
+            // Update the pemesanan record
+            $pemesanan->BUKTI_BAYAR = $path;
+            $pemesanan->TOTAL = $request->input('TOTAL');
+            $pemesanan->save();
 
-            return response()->json(['message' => 'Pemesanan updated successfully'], 200);
-        } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (Exception $e) {
-            \Log::error('Failed to update order: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Failed to update order',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Payment proof uploaded successfully!',
+                'fileUrl' => Storage::url($path)
+            ], 200);
         }
+
+        \Log::warning('No file uploaded');
+        return response()->json(['message' => 'No file uploaded'], 400);
     }
 }
 

@@ -130,14 +130,14 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/promopoin/{id}', [App\Http\Controllers\Api\PromoPoinController::class, 'destroy']);
 
     //Pemesanan
-    Route::get('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'index']);
-//     Route::get('/pemesananN/{id}', [App\Http\Controllers\Api\PemesananController::class, 'show']);
+    Route::get('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'indexNullJarak']);
+    Route::get('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'showNullJarak']);
 //     Route::post('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'store']);
-//     Route::put('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'update']);
+    Route::put('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'updateJarak']);
 //     Route::delete('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'destroy']);
-    Route::get('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'getPemesananById']);
+    Route::get('/pemesananId/{id}', [App\Http\Controllers\Api\PemesananController::class, 'getPemesananById']);
     Route::post('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'order']);
-    Route::put('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'update']);
+    // Route::put('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'update']);
     Route::put('/buktibayar/{id}', [App\Http\Controllers\Api\PemesananController::class, 'uploadBuktiBayar']);
     Route::delete('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'destroy']);
     Route::get('/pemesananunpaid', [App\Http\Controllers\Api\PemesananController::class, 'getUnpaidOrders']);
