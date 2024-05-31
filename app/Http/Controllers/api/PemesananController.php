@@ -11,6 +11,9 @@ use App\Models\DetailPemesananProduk;
 use App\Models\Hampers;
 use App\Models\Produk;
 use App\Models\LimitHarian;
+use App\Models\DetailResep;
+use App\Models\BahanBaku;
+use App\Models\DetailHampers;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
@@ -357,6 +360,209 @@ class PemesananController extends Controller
 
         \Log::warning('No file uploaded');
         return response()->json(['message' => 'No file uploaded'], 400);
+    }
+
+    public function indexDiterima()
+    {
+        try {
+            $besok = Carbon::now()->addDay()->format('Y-m-d:00:00:00');
+
+            $pemesanan = Pemesanan::where('STATUS', 'Diterima')
+                ->whereDate('TANGGAL_AMBIL', $besok)
+                ->get();
+
+            return response([
+                "status" => true,
+                'message' => 'All Pesanan Retrieved',
+                'data' => $pemesanan
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status" => false,
+                "message" => $e->getMessage(),
+                "data" => []
+            ], 400);
+        }
+    }
+
+    public function updateStatusToDiproses($id)
+    {
+        DB::beginTransaction();
+        try {
+            $pemesanan = Pemesanan::with(['detailPemesananProduk.produk', 'detailPemesananHampers.hampers'])->findOrFail($id);
+
+            if (!$this->checkBahanBakuStock($pemesanan)) {
+                throw new \Exception("Stok bahan baku tidak mencukupi untuk memproses pesanan ini.");
+            }
+
+            $pemesanan->STATUS = 'Diproses';
+            $pemesanan->save();
+
+            $this->reduceBahanBakuStock($pemesanan);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Status berhasil diubah menjadi Diproses',
+                'data' => $pemesanan
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+                'data' => []
+            ], 400);
+        }
+    }
+
+    protected function checkBahanBakuStock($pemesanan)
+    {
+        foreach ($pemesanan->detailPemesananProduk as $detailProduk) {
+            $produk = $detailProduk->produk;
+            $resepDetails = DetailResep::where('ID_PRODUK', $produk->ID_PRODUK)->get();
+
+            foreach ($resepDetails as $detailResep) {
+                $bahanBaku = BahanBaku::find($detailResep->ID_BAHAN_BAKU);
+                if ($bahanBaku && $bahanBaku->STOK < ($detailResep->PENGGUNAAN_STOK * $detailProduk->KUANTITAS)) {
+                    return false;
+                }
+            }
+        }
+
+        foreach ($pemesanan->detailPemesananHampers as $detailHampers) {
+            $hamper = $detailHampers->hampers;
+            $detailHampersProduk = DetailHampers::where('ID_HAMPERS', $hamper->ID_HAMPERS)->get();
+
+            foreach ($detailHampersProduk as $detailHamperProduk) {
+                $produk = Produk::find($detailHamperProduk->ID_PRODUK);
+                $resepDetails = DetailResep::where('ID_PRODUK', $produk->ID_PRODUK)->get();
+
+                foreach ($resepDetails as $detailResep) {
+                    $bahanBaku = BahanBaku::find($detailResep->ID_BAHAN_BAKU);
+                    if ($bahanBaku && $bahanBaku->STOK < ($detailResep->PENGGUNAAN_STOK * $detailHampers->KUANTITAS)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    protected function reduceBahanBakuStock($pemesanan)
+    {
+        foreach ($pemesanan->detailPemesananProduk as $detailProduk) {
+            $produk = $detailProduk->produk;
+            $resepDetails = DetailResep::where('ID_PRODUK', $produk->ID_PRODUK)->get();
+
+            foreach ($resepDetails as $detailResep) {
+                $bahanBaku = BahanBaku::find($detailResep->ID_BAHAN_BAKU);
+                if ($bahanBaku) {
+                    $bahanBaku->STOK -= ($detailResep->PENGGUNAAN_STOK * $detailProduk->KUANTITAS);
+                    $bahanBaku->save();
+                }
+            }
+        }
+
+        foreach ($pemesanan->detailPemesananHampers as $detailHampers) {
+            $hamper = $detailHampers->hampers;
+            $detailHampersProduk = DetailHampers::where('ID_HAMPERS', $hamper->ID_HAMPERS)->get();
+
+            foreach ($detailHampersProduk as $detailHamperProduk) {
+                $produk = Produk::find($detailHamperProduk->ID_PRODUK);
+                $resepDetails = DetailResep::where('ID_PRODUK', $produk->ID_PRODUK)->get();
+
+                foreach ($resepDetails as $detailResep) {
+                    $bahanBaku = BahanBaku::find($detailResep->ID_BAHAN_BAKU);
+                    if ($bahanBaku) {
+                        $bahanBaku->STOK -= ($detailResep->PENGGUNAAN_STOK * $detailHampers->KUANTITAS);
+                        $bahanBaku->save();
+                    }
+                }
+            }
+        }
+    }
+
+    public function getBahanBakuUsage($id)
+    {
+        try {
+            $pemesanan = Pemesanan::with(['detailPemesananProduk.produk', 'detailPemesananHampers.hampers'])->findOrFail($id);
+
+            $bahanBakuUsage = [];
+            $produkList = [];
+            $hampersList = [];
+
+            // Loop through detail_pemesanan_produk
+            foreach ($pemesanan->detailPemesananProduk as $detailProduk) {
+                $produk = $detailProduk->produk;
+                $produkList[] = [
+                    'ID_PRODUK' => $produk->ID_PRODUK,
+                    'NAMA_PRODUK' => $produk->NAMA_PRODUK,
+                    'KUANTITAS' => $detailProduk->KUANTITAS,
+                    'HARGA' => $detailProduk->HARGA
+                ];
+
+                $resepDetails = DetailResep::where('ID_PRODUK', $produk->ID_PRODUK)->get();
+                foreach ($resepDetails as $detailResep) {
+                    $bahanBaku = BahanBaku::find($detailResep->ID_BAHAN_BAKU);
+                    if ($bahanBaku) {
+                        if (!isset($bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU])) {
+                            $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU] = [
+                                'NAMA_BAHAN_BAKU' => $bahanBaku->NAMA_BAHAN_BAKU,
+                                'TOTAL_PENGGUNAAN' => 0
+                            ];
+                        }
+                        $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU]['TOTAL_PENGGUNAAN'] += ($detailResep->PENGGUNAAN_STOK * $detailProduk->KUANTITAS);
+                    }
+                }
+            }
+
+            // Loop through detail_pemesanan_hampers
+            foreach ($pemesanan->detailPemesananHampers as $detailHampers) {
+                $hamper = $detailHampers->hampers;
+                $hampersList[] = [
+                    'ID_HAMPERS' => $hamper->ID_HAMPERS,
+                    'NAMA_HAMPERS' => $hamper->NAMA_HAMPERS,
+                    'KUANTITAS' => $detailHampers->KUANTITAS,
+                    'HARGA' => $detailHampers->HARGA
+                ];
+
+                $detailHampersProduk = DetailHampers::where('ID_HAMPERS', $hamper->ID_HAMPERS)->get();
+                foreach ($detailHampersProduk as $detailHamperProduk) {
+                    $produk = Produk::find($detailHamperProduk->ID_PRODUK);
+                    $resepDetails = DetailResep::where('ID_PRODUK', $produk->ID_PRODUK)->get();
+                    foreach ($resepDetails as $detailResep) {
+                        $bahanBaku = BahanBaku::find($detailResep->ID_BAHAN_BAKU);
+                        if ($bahanBaku) {
+                            if (!isset($bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU])) {
+                                $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU] = [
+                                    'NAMA_BAHAN_BAKU' => $bahanBaku->NAMA_BAHAN_BAKU,
+                                    'TOTAL_PENGGUNAAN' => 0
+                                ];
+                            }
+                            $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU]['TOTAL_PENGGUNAAN'] += ($detailResep->PENGGUNAAN_STOK * $detailHampers->KUANTITAS);
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Bahan baku usage retrieved successfully',
+                'data' => [
+                    'bahan_baku' => array_values($bahanBakuUsage),
+                    'produk' => $produkList,
+                    'hampers' => $hampersList
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+                'data' => []
+            ], 400);
+        }
     }
 }
 

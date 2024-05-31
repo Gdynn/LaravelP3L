@@ -15,7 +15,6 @@ class Produk extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'ID_RESEP',
         'NAMA_PRODUK',
         'KUANTITAS',
         'HARGA',

@@ -28,6 +28,8 @@ Route::get('/produkTitipan', [App\Http\Controllers\Api\ProdukController::class, 
 Route::get('/produkMobile', [App\Http\Controllers\Api\ProdukController::class, 'fetchMobile']);
 Route::get('/produkLimit', [App\Http\Controllers\Api\ProdukController::class, 'fetchProdukLimit']);
 
+Route::put('/pemesanandiproses/{id}', [App\Http\Controllers\Api\PemesananController::class, 'updateStatusToDiproses']);
+
 Route::middleware('auth:api')->group(function () {
     //user
     Route::get('/users', [App\Http\Controllers\Api\UserController::class, 'showAll']);
@@ -141,6 +143,12 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/buktibayar/{id}', [App\Http\Controllers\Api\PemesananController::class, 'uploadBuktiBayar']);
     Route::delete('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'destroy']);
     Route::get('/pemesananunpaid', [App\Http\Controllers\Api\PemesananController::class, 'getUnpaidOrders']);
+    Route::get('/pemesananditerima', [App\Http\Controllers\Api\PemesananController::class, 'indexDiterima']);
+    // Route::put('/pemesanandiproses/{id}', [App\Http\Controllers\Api\PemesananController::class, 'updateStatusToDiproses']);
+    Route::get('/pemesananbahanbaku/{id}', [App\Http\Controllers\Api\PemesananController::class, 'getBahanBakuUsage']);
+
+    //Laporan
+    Route::get('/laporan-penjualan-bulanan/{bulan}/{tahun}', [App\Http\Controllers\Api\LaporanController::class, 'laporanPenjualanBulanan']);
 
     //DetailPemesananHampers
     Route::get('/detailpemesananhampers', [App\Http\Controllers\Api\DetailPemesananHampersController::class, 'index']);
