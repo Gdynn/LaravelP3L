@@ -14,6 +14,7 @@ use App\Models\LimitHarian;
 use App\Models\DetailResep;
 use App\Models\BahanBaku;
 use App\Models\DetailHampers;
+use App\Models\PenggunaanBahanBaku;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
@@ -399,6 +400,7 @@ class PemesananController extends Controller
             $pemesanan->save();
 
             $this->reduceBahanBakuStock($pemesanan);
+            $this->recordBahanBakuUsage($pemesanan); // Record the usage of raw materials
 
             DB::commit();
 
@@ -513,7 +515,19 @@ class PemesananController extends Controller
                                 'TOTAL_PENGGUNAAN' => 0
                             ];
                         }
-                        $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU]['TOTAL_PENGGUNAAN'] += ($detailResep->PENGGUNAAN_STOK * $detailProduk->KUANTITAS);
+
+                        $penggunaanStok = $detailResep->PENGGUNAAN_STOK;
+
+                        // Check if product name contains '1/2'
+                        if (strpos($produk->NAMA_PRODUK, '1/2') !== false) {
+                            if ($detailProduk->KUANTITAS == 1) {
+                                $penggunaanStok = $detailResep->PENGGUNAAN_STOK;
+                            } else {
+                                $penggunaanStok = $detailResep->PENGGUNAAN_STOK / 2;
+                            }
+                        }
+
+                        $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU]['TOTAL_PENGGUNAAN'] += ($penggunaanStok * $detailProduk->KUANTITAS);
                     }
                 }
             }
@@ -541,7 +555,19 @@ class PemesananController extends Controller
                                     'TOTAL_PENGGUNAAN' => 0
                                 ];
                             }
-                            $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU]['TOTAL_PENGGUNAAN'] += ($detailResep->PENGGUNAAN_STOK * $detailHampers->KUANTITAS);
+
+                            $penggunaanStok = $detailResep->PENGGUNAAN_STOK;
+
+                            // Check if product name contains '1/2'
+                            if (strpos($produk->NAMA_PRODUK, '1/2') !== false) {
+                                if ($detailHampers->KUANTITAS == 1) {
+                                    $penggunaanStok = $detailResep->PENGGUNAAN_STOK;
+                                } else {
+                                    $penggunaanStok = $detailResep->PENGGUNAAN_STOK / 2;
+                                }
+                            }
+
+                            $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU]['TOTAL_PENGGUNAAN'] += ($penggunaanStok * $detailHampers->KUANTITAS);
                         }
                     }
                 }
@@ -564,5 +590,58 @@ class PemesananController extends Controller
             ], 400);
         }
     }
-}
 
+    private function recordBahanBakuUsage($pemesanan)
+    {
+        $bahanBakuUsage = [];
+
+        // Loop through detail_pemesanan_produk
+        foreach ($pemesanan->detailPemesananProduk as $detailProduk) {
+            $produk = $detailProduk->produk;
+
+            $resepDetails = DetailResep::where('ID_PRODUK', $produk->ID_PRODUK)->get();
+            foreach ($resepDetails as $detailResep) {
+                $bahanBaku = BahanBaku::find($detailResep->ID_BAHAN_BAKU);
+                if ($bahanBaku) {
+                    if (!isset($bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU])) {
+                        $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU] = [
+                            'ID_BAHAN_BAKU' => $bahanBaku->ID_BAHAN_BAKU,
+                            'KUANTITAS' => 0,
+                            'TANGGAL' => Carbon::now()
+                        ];
+                    }
+                    $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU]['KUANTITAS'] += ($detailResep->PENGGUNAAN_STOK * $detailProduk->KUANTITAS);
+                }
+            }
+        }
+
+        // Loop through detail_pemesanan_hampers
+        foreach ($pemesanan->detailPemesananHampers as $detailHampers) {
+            $hamper = $detailHampers->hampers;
+
+            $detailHampersProduk = DetailHampers::where('ID_HAMPERS', $hamper->ID_HAMPERS)->get();
+            foreach ($detailHampersProduk as $detailHamperProduk) {
+                $produk = Produk::find($detailHamperProduk->ID_PRODUK);
+                $resepDetails = DetailResep::where('ID_PRODUK', $produk->ID_PRODUK)->get();
+                foreach ($resepDetails as $detailResep) {
+                    $bahanBaku = BahanBaku::find($detailResep->ID_BAHAN_BAKU);
+                    if ($bahanBaku) {
+                        if (!isset($bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU])) {
+                            $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU] = [
+                                'ID_BAHAN_BAKU' => $bahanBaku->ID_BAHAN_BAKU,
+                                'KUANTITAS' => 0,
+                                'TANGGAL' => Carbon::now()
+                            ];
+                        }
+                        $bahanBakuUsage[$bahanBaku->ID_BAHAN_BAKU]['KUANTITAS'] += ($detailResep->PENGGUNAAN_STOK * $detailHampers->KUANTITAS);
+                    }
+                }
+            }
+        }
+
+        // Insert the usage data into the database
+        foreach ($bahanBakuUsage as $usage) {
+            PenggunaanBahanBaku::create($usage);
+        }
+    }
+}
