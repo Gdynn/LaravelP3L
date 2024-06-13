@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\api;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pemesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\FirebaseHelper;
 
 class DaftarPesananController extends Controller
 {
@@ -37,8 +38,6 @@ class DaftarPesananController extends Controller
         }
     }
 
-
-
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
@@ -65,9 +64,20 @@ class DaftarPesananController extends Controller
             $validatedData['TIP'] = $validatedData['JUMLAH_BAYAR'] - $validatedData['TOTAL'];
             Log::info('Calculated Tip: ' . $validatedData['TIP']); // Menambahkan log untuk debugging
 
+            // Ubah status menjadi 'Diproses'
+            $validatedData['STATUS'] = 'Diproses';
 
             // Update pemesanan dengan data yang telah divalidasi
             $pemesanan->update($validatedData);
+
+            // Mengirim notifikasi setelah status diperbarui
+            if ($pemesanan->fcm) {
+                Log::info("Mengirim notifikasi ke token: " . $pemesanan->fcm);
+                $firebaseHelper = new FirebaseHelper();
+                $firebaseHelper->sendNotification($pemesanan->fcm, 'Pesanan Diproses', 'Pesanan Anda sedang diproses');
+            } else {
+                Log::warning("Token FCM tidak ditemukan untuk pemesanan ID: " . $pemesanan->id);
+            }
 
             return response()->json([
                 "status" => true,

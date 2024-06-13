@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-    
+
     protected $table = 'users';
     protected $primaryKey = 'id_user';
     public $timestamps = false;
@@ -30,6 +30,7 @@ class User extends Authenticatable
         'type_pengguna',
         'verify_key',
         'active',
+        'fcm_token',
     ];
 
     public function saldo()
@@ -47,4 +48,3 @@ class User extends Authenticatable
         return $this->hasMany(Alamat::class, 'ID_USER', 'id_user'); // Changed from hasOne to hasMany
     }
 }
-

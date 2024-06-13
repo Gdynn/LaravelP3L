@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use App\Models\User; // Pastikan ini sesuai dengan lokasi model User Anda
 
 class Pemesanan extends Model
@@ -29,6 +30,8 @@ class Pemesanan extends Model
         'DELIVERY',
         'ALAMAT',
         'TIP',
+        'fcm',
+        'jumlah'
     ];
 
     protected $casts = [
@@ -36,14 +39,18 @@ class Pemesanan extends Model
         'TANGGAL_PESAN' => 'datetime',
         'TANGGAL_LUNAS' => 'datetime',
         'TANGGAL_AMBIL' => 'datetime',
-        'BUKTI_BAYAR' => 'string'
+        'BUKTI_BAYAR' => 'array'
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'ID_USER', 'ID_USER');
+        return $this->belongsTo(User::class, 'ID_USER');
     }
-    
+
+    public function setBuktiBayarAttribute($value)
+    {
+        $this->attributes['BUKTI_BAYAR'] = base64_encode($value);
+    }
     public function getBuktiBayarAttribute($value)
     {
         return $value ? base64_encode($value) : null;
@@ -63,5 +70,22 @@ class Pemesanan extends Model
     public function detailPemesananHampers()
     {
         return $this->hasMany(DetailPemesananHampers::class, 'ID_PEMESANAN', 'ID_PEMESANAN');
+    }
+
+    public static function getMonthlySales()
+    {
+        $statuses = ['Selesai', 'Siap di pick up', 'Diambil sendiri', 'Diproses'];
+
+        $sales = self::selectRaw('YEAR(TANGGAL_PESAN) as year, MONTH(TANGGAL_PESAN) as month, DAY(TANGGAL_PESAN) as day, SUM(jumlah) as total_sales')
+            ->whereIn('status', $statuses)
+            ->groupBy('year', 'month', 'day')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->orderBy('day', 'asc')
+            ->get();
+
+        Log::info('Monthly Sales Data: ', $sales->toArray());
+
+        return $sales;
     }
 }
