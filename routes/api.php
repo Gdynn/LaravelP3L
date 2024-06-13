@@ -2,6 +2,27 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\api\ProsesPesananController;
+
+use App\Http\Controllers\Api\TokenController;
+
+Route::post('/save-token', [TokenController::class, 'store']);
+
+use App\Http\Controllers\TestController;
+
+Route::get('/test-read-firebase', [TestController::class, 'readFirebaseConfig']);
+
+// routes/api.php
+
+use App\Http\Controllers\api\LaporanPerbulanController;
+
+Route::get('/monthlysales', [LaporanPerbulanController::class, 'getMonthlySales']);
+
+use App\Http\Controllers\api\LaporanBahanBakuController;
+
+Route::get('/pengeluaran', [LaporanBahanBakuController::class, 'getPengeluaran']);
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -132,9 +153,9 @@ Route::middleware('auth:api')->group(function () {
     //Pemesanan
     Route::get('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'indexNullJarak']);
     Route::get('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'showNullJarak']);
-//     Route::post('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'store']);
+    //     Route::post('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'store']);
     Route::put('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'updateJarak']);
-//     Route::delete('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'destroy']);
+    //     Route::delete('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'destroy']);
     Route::get('/pemesananId/{id}', [App\Http\Controllers\Api\PemesananController::class, 'getPemesananById']);
     Route::post('/pemesanan', [App\Http\Controllers\Api\PemesananController::class, 'order']);
     // Route::put('/pemesanan/{id}', [App\Http\Controllers\Api\PemesananController::class, 'update']);
@@ -176,7 +197,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/tippesanan', [App\Http\Controllers\Api\TipPesananController::class, 'store']);
     Route::put('/tippesanan/{id}', [App\Http\Controllers\Api\TipPesananController::class, 'update']);
     Route::delete('/tippesanan/{id}', [App\Http\Controllers\Api\TipPesananController::class, 'destroy']);
-  
+
     //Limit Harian
     Route::get('/limitharian', [App\Http\Controllers\Api\LimitHarianController::class, 'index']);
     Route::get('/limitharian/{id}', [App\Http\Controllers\Api\LimitHarianController::class, 'show']);
@@ -184,4 +205,32 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/limitharian', [App\Http\Controllers\Api\LimitHarianController::class, 'store']);
     Route::put('/limitharian/{id}', [App\Http\Controllers\Api\LimitHarianController::class, 'update']);
     Route::delete('/limitharian/{id}', [App\Http\Controllers\Api\LimitHarianController::class, 'destroy']);
+
+    //Pesanan dengan status diproses
+    Route::get('/prosespesanan', [App\Http\Controllers\Api\ProsesPesananController::class, 'index']);
+    Route::get('/prosespesanan/{id}', [App\Http\Controllers\Api\ProsesPesananController::class, 'show']);
+    Route::post('/prosespesanan', [App\Http\Controllers\Api\ProsesPesananController::class, 'store']);
+    Route::put('/prosespesanan/{id}', [App\Http\Controllers\Api\ProsesPesananController::class, 'update']);
+    Route::delete('/prosespesanan/{id}', [App\Http\Controllers\Api\ProsesPesananController::class, 'destroy']);
+
+    //untuk menampilkan pesanan dengan status siap di pick up atau diambil sendiri
+    Route::get('/pickuppesanan', [App\Http\Controllers\Api\PesananYangDiProsesController::class, 'index']);
+    Route::get('/pickuppesanan/{id}', [App\Http\Controllers\Api\PesananYangDiProsesController::class, 'show']);
+    Route::post('/pickuppesanan', [App\Http\Controllers\Api\PesananYangDiProsesController::class, 'store']);
+    Route::put('/pickuppesanan/{id}', [App\Http\Controllers\Api\PesananYangDiProsesController::class, 'update']);
+    Route::delete('/pickuppesanan/{id}', [App\Http\Controllers\Api\PesananYangDiProsesController::class, 'destroy']);
+
+    //pesanan yang statusnnya akan diselesaikan
+    Route::get('/statusselesai', [App\Http\Controllers\Api\PesananSelesaiController::class, 'index']);
+    Route::get('/statusselesai/{id}', [App\Http\Controllers\Api\PesananSelesaiController::class, 'show']);
+    Route::post('/statusselesai', [App\Http\Controllers\Api\PesananSelesaiController::class, 'store']);
+    Route::put('/statusselesai/{id}', [App\Http\Controllers\Api\PesananSelesaiController::class, 'update']);
+    Route::delete('/statusselesai/{id}', [App\Http\Controllers\Api\PesananSelesaiController::class, 'destroy']);
+
+    //laporan perbulanan
+    // Route::get('/monthlysales', [App\Http\Controllers\Api\LaporanPerbulanController::class, 'index']);
+    // Route::get('/monthlysales/{id}', [App\Http\Controllers\Api\LaporanPerbulanController::class, 'show']);
+    // Route::post('/monthlysales', [App\Http\Controllers\Api\LaporanPerbulanController::class, 'store']);
+    // Route::put('/monthlysales/{id}', [App\Http\Controllers\Api\LaporanPerbulanController::class, 'update']);
+    // Route::delete('/monthlysales/{id}', [App\Http\Controllers\Api\LaporanPerbulanController::class, 'destroy']);
 });
